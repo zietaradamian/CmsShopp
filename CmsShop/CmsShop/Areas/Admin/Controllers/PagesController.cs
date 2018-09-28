@@ -14,11 +14,11 @@ namespace CmsShop.Areas.Admin.Controllers
             //Deklaracja listy pagevm
             List<PageVM> pagesList;
 
-            
+
             using (Db db = new Db())
             {
                 //Inicjalizacja listy
-                pagesList = db.Pages.ToArray().OrderBy(x => x.Sorting).Select(x=> new PageVM(x)).ToList();
+                pagesList = db.Pages.ToArray().OrderBy(x => x.Sorting).Select(x => new PageVM(x)).ToList();
 
 
             }
@@ -40,7 +40,7 @@ namespace CmsShop.Areas.Admin.Controllers
         {
             //Sprawdzanie model state
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return View(model);
             }
@@ -52,7 +52,7 @@ namespace CmsShop.Areas.Admin.Controllers
                 PageDTO dto = new PageDTO();
 
                 //gdy nie ma adresu strony zostaje przypisany tytul
-                if(string.IsNullOrWhiteSpace(model.Slug))
+                if (string.IsNullOrWhiteSpace(model.Slug))
                 {
                     slug = model.Title.Replace(" ", "-").ToLower();
                 }
@@ -62,7 +62,7 @@ namespace CmsShop.Areas.Admin.Controllers
                 }
 
                 //zapobieganie dodanie takiej samej nazwy strony
-                if(db.Pages.Any(x=> x.Title == model.Title) || db.Pages.Any(x => x.Slug == slug))
+                if (db.Pages.Any(x => x.Title == model.Title) || db.Pages.Any(x => x.Slug == slug))
                 {
                     ModelState.AddModelError("", "Ten tytuł lub adres strony już istnieje.");
                     return View(model);
@@ -83,5 +83,83 @@ namespace CmsShop.Areas.Admin.Controllers
 
             return RedirectToAction("AddPage");
         }
+        // Get: Admin/Pages/EditPage
+        [HttpGet]
+        public ActionResult EditPage(int id)
+        {
+            //deklaracja PageVM
+            PageVM model;
+
+            using (Db db = new Db())
+            {
+                //pobieramy strone z bazy po Id
+                PageDTO dto = db.Pages.Find(id);
+                //sprawdzanie czy istnieje dana strona
+                if (dto == null)
+                {
+                    return Content("Strona nie istnieje");
+                }
+
+                model = new PageVM(dto);
+            }
+
+
+            return View(model);
+        }
+
+
+        // POST: Admin/Pages/EditPage
+        [HttpPost]
+        public ActionResult EditPage(PageVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            using (Db db = new Db())
+            {
+                //pobranie id strony
+                int id = model.Id;
+                //inicjalizacja slug
+                string slug= "home";
+
+                //pobieranie strony do edycji
+                PageDTO dto = db.Pages.Find(id);
+
+               
+
+                if (model.Slug != "home")
+                {
+                    if (string.IsNullOrWhiteSpace(model.Slug))
+                    {
+                        slug = model.Title.Replace(" ", "-").ToLower();
+                    }
+                    else
+                    {
+                        slug = model.Slug.Replace(" ", "-").ToLower();
+                    }
+                }
+                //sprawdzanie duplikacji strony,adresu
+                if (db.Pages.Where(x=> x.Id != id).Any(x=> x.Title == model.Title) ||
+                    db.Pages.Where(x => x.Id != id).Any(x => x.Slug == slug))
+                {
+                    ModelState.AddModelError("", "Strona lub adres strony już istnieje!");
+                    return View(model);
+                }
+                //modyfikacja danych
+                dto.Title = model.Title;
+                dto.Slug = slug;
+                dto.Body = model.Body;
+                dto.HasSideBar = model.HasSideBar;
+                //zapis do bazy
+                db.SaveChanges();
+            }
+
+            TempData["SM"] = "Wyedytowałeś strone";
+
+            return RedirectToAction("EditPage");
+        }
+
     }
 }
