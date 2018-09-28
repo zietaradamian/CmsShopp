@@ -222,5 +222,43 @@ namespace CmsShop.Areas.Admin.Controllers
             }
             return View();
         }
+
+        // Get: Admin/Pages/EditSidebar
+        [HttpGet]
+        public ActionResult EditSidebar()
+        {
+            //Deklaracja SidebarVm
+
+            SidebarVM model;
+
+            using (Db db = new Db())
+            {
+                //Pobieranie SidebarDTO
+                SidebarDTO dto = db.Sidebar.Find(1);
+
+                //inicjalizacja modelu
+                model = new SidebarVM(dto);
+            }
+            return View(model);
+        }
+        [HttpPost]
+        public ActionResult EditSidebar(SidebarVM model)
+        {
+            //Deklaracja SidebarVm
+            using (Db db = new Db())
+            {
+                SidebarDTO dto = db.Sidebar.Find(1);
+
+                //modyfikacja Sidebar
+                dto.Body = model.Body;
+
+                db.SaveChanges();
+
+            }
+            //komunikat o modyfkacji sidebar
+            TempData["SM"] = "Zmodyfikowałeś pasek boczny";
+            return RedirectToAction("EditSidebar");
+        }
+
     }
 }
