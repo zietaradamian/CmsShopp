@@ -122,12 +122,12 @@ namespace CmsShop.Areas.Admin.Controllers
                 //pobranie id strony
                 int id = model.Id;
                 //inicjalizacja slug
-                string slug= "home";
+                string slug = "home";
 
                 //pobieranie strony do edycji
                 PageDTO dto = db.Pages.Find(id);
 
-               
+
 
                 if (model.Slug != "home")
                 {
@@ -141,7 +141,7 @@ namespace CmsShop.Areas.Admin.Controllers
                     }
                 }
                 //sprawdzanie duplikacji strony,adresu
-                if (db.Pages.Where(x=> x.Id != id).Any(x=> x.Title == model.Title) ||
+                if (db.Pages.Where(x => x.Id != id).Any(x => x.Title == model.Title) ||
                     db.Pages.Where(x => x.Id != id).Any(x => x.Slug == slug))
                 {
                     ModelState.AddModelError("", "Strona lub adres strony już istnieje!");
@@ -159,6 +159,30 @@ namespace CmsShop.Areas.Admin.Controllers
             TempData["SM"] = "Wyedytowałeś strone";
 
             return RedirectToAction("EditPage");
+        }
+        public ActionResult Details(int id)
+        {
+            //deklaracja PageVM
+            PageVM model;
+
+            using (Db db = new Db())
+            {
+                //pobieranie strony o id
+                PageDTO dto = db.Pages.Find(id);
+
+                if (dto == null)
+                {
+                    return Content("Strona nie istnieje!");
+                }
+
+                //inicjalizacja pagevm
+
+                model = new PageVM(dto);
+
+
+
+            }
+            return View(model);
         }
 
     }
