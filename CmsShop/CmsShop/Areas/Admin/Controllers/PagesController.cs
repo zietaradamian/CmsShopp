@@ -83,7 +83,7 @@ namespace CmsShop.Areas.Admin.Controllers
 
             return RedirectToAction("AddPage");
         }
-        // Get: Admin/Pages/EditPage
+        // Get: Admin/Pages/EditPage/id
         [HttpGet]
         public ActionResult EditPage(int id)
         {
@@ -160,6 +160,7 @@ namespace CmsShop.Areas.Admin.Controllers
 
             return RedirectToAction("EditPage");
         }
+        // Get: Admin/Pages/Details/id
         public ActionResult Details(int id)
         {
             //deklaracja PageVM
@@ -184,6 +185,20 @@ namespace CmsShop.Areas.Admin.Controllers
             }
             return View(model);
         }
+        // Get: Admin/Pages/Delete/id
+        public ActionResult Delete(int id)
+        {
+            using (Db db = new Db())
+            {
+                //Pobranie strony do usunięcia
+                PageDTO dto = db.Pages.Find(id);
+                //usuwanie strony z bazy
+                db.Pages.Remove(dto);
 
+                db.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }
