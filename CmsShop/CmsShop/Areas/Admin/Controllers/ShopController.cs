@@ -22,5 +22,36 @@ namespace CmsShop.Areas.Admin.Controllers
             }
             return View(categoryVMList);
         }
+        //POST: Admin/Shop/AddNewCategory
+        [HttpPost]
+        public string AddNewCategory(string catName)
+        {
+            //Deklaracja id
+            string id;
+
+            using (Db db = new Db())
+            {
+                //Sprawdzanie czy dana kategoria już istnieje
+                if (db.Categories.Any(x => x.Name == catName))
+                {
+                    return "tytulzajety";
+                }
+
+                //Inicjalizcja DTO
+                CategorieDTO dto = new CategorieDTO();
+                dto.Name = catName;
+                dto.Slug = catName.Replace(" ", "-").ToLower();
+                dto.Sorting = 1000;
+
+                //zapis do bazy
+                db.Categories.Add(dto);
+                db.SaveChanges();
+
+                //pobieranie id
+                id = dto.Id.ToString();
+            }
+
+            return id;
+        }
     }
 }

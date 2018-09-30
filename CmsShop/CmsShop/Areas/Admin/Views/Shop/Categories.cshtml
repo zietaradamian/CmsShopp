@@ -88,7 +88,7 @@ else
                         if (!$("table#pages").length) {
                             location.reload();
                         } else {
-                            ajaxText.html("<span class='alert alert-succes'>Kategoria została dodana</span>")
+                            ajaxText.html("<span class='alert alert-success'>Kategoria została dodana</span>")
                             setTimeout(function () {
                                 ajaxText.fadeOut("fast", function () {
                                     ajaxText.html("<img src='/Content/img/ajax-loader.gif'/>");
@@ -99,7 +99,7 @@ else
                             var toAppend = $("table#pages tbody tr:last").clone();
                             toAppend.attr("id", "id_" + data);
                             toAppend.find("#item_Name").val(catName);
-                            toAppend.find("a.delete").attr("href", "admin/shop/DeleteCategory" + data);
+                            toAppend.find("a.delete").attr("href", "admin/shop/DeleteCategory/" + data);
                             table.append(toAppend);
                             table.sortable("refresh");
                         }
