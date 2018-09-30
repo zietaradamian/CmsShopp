@@ -70,7 +70,7 @@ namespace CmsShop.Areas.Admin.Controllers
                 foreach (var catId in id)
                 {
                     dto = db.Categories.Find(catId);
-                    dto.Sorting= count;
+                    dto.Sorting = count;
 
                     //zapis do bazy
                     db.SaveChanges();
@@ -97,21 +97,29 @@ namespace CmsShop.Areas.Admin.Controllers
             }
             return RedirectToAction("Categories");
         }
+        //POST: Admin/Shop/RenameCategory
         [HttpPost]
-        public ActionResult RenameCategory(int id)
+        public string RenameCategory(string newCatName, int id)
         {
             using (Db db = new Db())
             {
-                //pobieranie kategorie
+                //sprawdzanie czy taka kategoria istnieje
+                if (db.Categories.Any(x => x.Name == newCatName))
+                    return "tytulzajety";
+                
+                //pobieranie kategorii
                 CategorieDTO dto = db.Categories.Find(id);
+                //edycja kategorii
+                dto.Name = newCatName;
+                dto.Slug = newCatName.Replace(" ","-").ToLower();
 
-                //Usuwanie kategorii
+                //zapis na bazie
 
-                db.Categories.Remove(dto);
                 db.SaveChanges();
+
             }
-            return RedirectToAction("Categories");
+            return "Ok";
         }
-        
+
     }
 }
