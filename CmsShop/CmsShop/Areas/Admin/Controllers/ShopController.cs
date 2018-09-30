@@ -97,5 +97,21 @@ namespace CmsShop.Areas.Admin.Controllers
             }
             return RedirectToAction("Categories");
         }
+        [HttpPost]
+        public ActionResult RenameCategory(int id)
+        {
+            using (Db db = new Db())
+            {
+                //pobieranie kategorie
+                CategorieDTO dto = db.Categories.Find(id);
+
+                //Usuwanie kategorii
+
+                db.Categories.Remove(dto);
+                db.SaveChanges();
+            }
+            return RedirectToAction("Categories");
+        }
+        
     }
 }
