@@ -1,5 +1,6 @@
 ﻿using CmsShop.Models.Data;
 using CmsShop.Models.ViewModels.Shop;
+using PagedList;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -134,7 +135,7 @@ namespace CmsShop.Areas.Admin.Controllers
 
             using (Db db = new Db())
             {
-                model.Categories = new SelectList(db.Categories.ToList(), "Id","Name");
+                model.Categories = new SelectList(db.Categories.ToList(), "Id", "Name");
             }
             return View(model);
         }
@@ -143,7 +144,7 @@ namespace CmsShop.Areas.Admin.Controllers
         public ActionResult AddProduct(ProductVM model, HttpPostedFileBase file)
         {
             //sprawdzanie czy model jest isvalid
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 using (Db db = new Db())
                 {
@@ -153,9 +154,9 @@ namespace CmsShop.Areas.Admin.Controllers
             }
 
             //sprawdzanie czy nazwa produktu jest unikalna
-            using(Db db = new Db())
+            using (Db db = new Db())
             {
-                if(db.Products.Any(x=> x.Name == model.Name))
+                if (db.Products.Any(x => x.Name == model.Name))
                 {
                     model.Categories = new SelectList(db.Categories.ToList(), "Id", "Name");
                     ModelState.AddModelError("", "Ta nazwa produktu jest zajeta!");
@@ -237,7 +238,7 @@ namespace CmsShop.Areas.Admin.Controllers
 
                 //zapis nazwy obrazka do bazy
 
-                using(Db db = new Db())
+                using (Db db = new Db())
                 {
                     ProductDTO dto = db.Products.Find(id);
                     dto.ImageName = imageName;
@@ -258,6 +259,40 @@ namespace CmsShop.Areas.Admin.Controllers
             #endregion
 
             return RedirectToAction("AddProduct");
+        }
+        //Get: Admin/Shop/Products
+        [HttpGet]
+        public ActionResult Products(int? page, int? catId)
+        {
+            //Deklaracja listy ProductVM
+            List<ProductVM> listOfProductVM;
+            //ustawianie nr strony
+
+            var pageNumber = page ?? 1;
+
+            using (Db db = new Db())
+            {
+                //Pobieranie listy produktów
+                listOfProductVM = db.Products.ToArray()
+                                    .Where(x => catId == null || catId == 0 || x.CategoryId == catId)
+                                    .Select(x => new ProductVM(x))
+                                    .ToList();
+
+                //Lista kategorii do dropdownList
+                ViewBag.Categories = new SelectList(db.Categories.ToList(), "Id","Name");
+
+                //ustawiamy wybrana kategorie
+                ViewBag.SelectCat = catId.ToString();
+
+            }
+
+            //ustawienie stronicowania (paginacji)
+            var onePageOfProducts = listOfProductVM.ToPagedList(pageNumber, 3);
+            ViewBag.OnePageOfProducts = onePageOfProducts;
+
+
+            //zwracamy widok z listą produktów
+            return View(listOfProductVM);
         }
 
     }
