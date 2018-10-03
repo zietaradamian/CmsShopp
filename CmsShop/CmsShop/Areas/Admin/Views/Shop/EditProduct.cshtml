@@ -94,19 +94,20 @@
     <h3>Brak galerii zdjęć dla tego produktu</h3>
 }
 
-<form action="/admin/shop/SaveGalleryImages" method="post" enctype="multipart/form-data" class="dropzone" id="dropzoneForm">
+<form action="/admin/shop/SaveGalleryImages?id=@Model.Id" method="post" enctype="multipart/form-data" class="dropzone" id="dropzoneForm">
     <div class="fallback">
         <input type="file" name="file" multiple />
         <input type="submit" value="Upload" />
     </div>
 </form>
+
 <br /><br />
 
-@foreach (var img in Model.GalleryImages)
+@foreach (var image in Model.GalleryImages)
 {
     <div style="display: inline-block">
-        <img src="/Images/Uploads/Products/@Model.Id/Gallery/Thumbs/@img" />
-        @Html.ActionLink("usun", "DeleteImage", "Shop", new { @class = "deleteimage", data_name = img });
+        <img src="~/Images/Uploads/Products/@Model.Id/Gallery/Thumbs/@image" />
+        @Html.ActionLink("usun", "DeleteImage", "Shop", new { @class = "deleteimage", data_name = image });
     </div>
 }
 
@@ -143,7 +144,7 @@
                 acceptedFiles: "image/*",
                 init: function () {
                     this.on("complete", function (file) {
-                        if (this.getUploadingFiles().lenght === 0 && this.getQueuedFiles().lenght === 0) {
+                        if (this.getUploadingFiles().length === 0 && this.getQueuedFiles().length === 0) {
                             Location.reload();
                         }
                     });
@@ -151,7 +152,7 @@
                         formData.append("id",@Model.Id);
                     });
                 }
-            }
+            };
 
 
         });
