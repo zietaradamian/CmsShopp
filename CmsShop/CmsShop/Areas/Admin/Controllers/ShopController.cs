@@ -279,7 +279,7 @@ namespace CmsShop.Areas.Admin.Controllers
                                     .ToList();
 
                 //Lista kategorii do dropdownList
-                ViewBag.Categories = new SelectList(db.Categories.ToList(), "Id","Name");
+                ViewBag.Categories = new SelectList(db.Categories.ToList(), "Id", "Name");
 
                 //ustawiamy wybrana kategorie
                 ViewBag.SelectCat = catId.ToString();
@@ -320,7 +320,7 @@ namespace CmsShop.Areas.Admin.Controllers
 
             }
 
-                return View(model);
+            return View(model);
         }
         //POST: Admin/Shop/EditProduct
         [HttpPost]
@@ -330,7 +330,7 @@ namespace CmsShop.Areas.Admin.Controllers
             int id = model.Id;
 
             // pobranie kategorii dla listy rozwijanej
-            using(Db db = new Db())
+            using (Db db = new Db())
             {
                 model.Categories = new SelectList(db.Categories.ToList(), "Id", "Name");
             }
@@ -347,7 +347,7 @@ namespace CmsShop.Areas.Admin.Controllers
             //sprawdzenie czy nazwa produktu jest unikalna
             using (Db db = new Db())
             {
-                if (db.Products.Where(x=>x.Id != id).Any(x=>x.Name == model.Name))
+                if (db.Products.Where(x => x.Id != id).Any(x => x.Name == model.Name))
                 {
                     ModelState.AddModelError("", "Ta nazwa produktu jest zajęta!");
                     return View(model);
@@ -374,6 +374,62 @@ namespace CmsShop.Areas.Admin.Controllers
             TempData["SM"] = "Edytowałeś produkt";
 
             #region ImageUpload
+
+            //sprawdzanie czy jest plik
+
+            if (file != null && file.ContentLength > 0)
+            {
+                //sprawdzenie rozszerzenie pliku czy to jest obrazek
+                string ext = file.ContentType.ToLower();
+                if (ext != "image/jpg" &&
+                    ext != "image/jpeg" &&
+                    ext != "image/png" &&
+                    ext != "image/pjpg" &&
+                    ext != "image/gif" &&
+                    ext != "image/x-png")
+                {
+                    using (Db db = new Db())
+                    {
+                        ModelState.AddModelError("", "Obraz nie został przesłany - nieporawidłowe rozszerzenie obrazka");
+                        model.Categories = new SelectList(db.Categories.ToList(), "Id", "Name");
+                        return View(model);
+                    }
+                }
+                //Utworzenie struktury katalogów
+                var orginalDirectory = new DirectoryInfo(string.Format("{0}Images\\Uploads", Server.MapPath(@"\")));
+                var pathString1 = Path.Combine(orginalDirectory.ToString(), "Products\\" + id.ToString());
+                var pathString2 = Path.Combine(orginalDirectory.ToString(), "Products\\" + id.ToString() + "\\Thumbs");
+
+                //Usuwamy stare pliki z katalogów
+                DirectoryInfo di1 = new DirectoryInfo(pathString1);
+                DirectoryInfo di2 = new DirectoryInfo(pathString2);
+
+                foreach (var file2 in di1.GetFiles())
+                {
+                    file2.Delete();
+                }
+                foreach (var file3 in di2.GetFiles())
+                {
+                    file3.Delete();
+                }
+
+                //Dodawanie nowych obrazków i zapis na bazie nazwy plików
+                string ImageName = file.FileName;
+                using (Db db = new Db())
+                {
+                    ProductDTO dto = db.Products.Find(id);
+                    dto.ImageName = ImageName;
+                    db.SaveChanges();
+                }
+                var path = string.Format("{0}\\{1}", pathString1, ImageName);
+                var path2 = string.Format("{0}\\{1}", pathString2, ImageName);
+
+                file.SaveAs(path);
+
+                WebImage img = new WebImage(file.InputStream);
+                img.Resize(200, 200);
+                img.Save(path2);
+            }
 
             #endregion
 
