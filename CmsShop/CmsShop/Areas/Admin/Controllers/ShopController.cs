@@ -435,6 +435,28 @@ namespace CmsShop.Areas.Admin.Controllers
 
             return RedirectToAction("EditProduct");
         }
+        //Get: Admin/Shop/DeleteProduct/id
+        [HttpGet]
+        public ActionResult DeleteProduct(int id)
+        {
+            //usunięcie produktu z bazy
+            using (Db db = new Db())
+            {
+                ProductDTO dto = db.Products.Find(id);
+                db.Products.Remove(dto);
+                db.SaveChanges();
+            }
+            //usuniecie folderu z obrazkami
+            var orginalDirectory = new DirectoryInfo(string.Format("{0}Images\\Uploads", Server.MapPath(@"\")));
+            var pathString = Path.Combine(orginalDirectory.ToString(), "Products\\" + id.ToString());
+
+            if (Directory.Exists(pathString))
+            {
+                Directory.Delete(pathString,true);
+            }
+
+            return RedirectToAction("Products");
+        }
 
     }
 }
