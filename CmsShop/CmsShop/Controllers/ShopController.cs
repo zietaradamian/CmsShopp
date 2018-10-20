@@ -29,5 +29,23 @@ namespace CmsShop.Controllers
             //zwracamy partialView z listą
             return PartialView(categoryVMList);
         }
+        public ActionResult Category(string name)
+        {
+            //deklaracja ProductVm list
+            List<ProductVM> productVMList;
+            using (Db db = new Db())
+            {
+                //pobranie id kategorii
+                CategorieDTO catDTO = db.Categories.Where(x => x.Slug == name).FirstOrDefault();
+                int catId = catDTO.Id;
+
+                //inicjalizacja listy produktów
+                productVMList = db.Products.ToArray().Where(x => x.CategoryId == catId).Select(x => new ProductVM(x)).ToList();
+                //pobieramy nazwę kategorii
+                var productCat = db.Products.Where(x => x.CategoryId == catId).FirstOrDefault();
+                ViewBag.CategoryName = productCat.CategoryName;
+            }
+            return View(productVMList);
+        }
     }
 }
