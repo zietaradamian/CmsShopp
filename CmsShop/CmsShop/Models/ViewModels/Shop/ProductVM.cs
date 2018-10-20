@@ -14,6 +14,7 @@ namespace CmsShop.Models.ViewModels.Shop
         {
 
         }
+
         public ProductVM(ProductDTO row)
         {
             Id = row.Id;
@@ -28,7 +29,7 @@ namespace CmsShop.Models.ViewModels.Shop
 
         public int Id { get; set; }
         [Required]
-        [Display(Name ="Nazwa")]
+        [Display(Name = "Nazwa")]
         public string Name { get; set; }
         public string Slug { get; set; }
         [Required]
