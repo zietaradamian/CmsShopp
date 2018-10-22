@@ -12,7 +12,27 @@ namespace CmsShop.Controllers
         // GET: Cart
         public ActionResult Index()
         {
-            return View();
+            //inicjalizacja koszyka
+            var cart = Session["cart"] as List<CartVM> ?? new List<CartVM>();
+
+            //sprawdzamy czy nasz koszyk jest pusty
+
+            if (cart.Count == 0 || Session["cart"] != null)
+            {
+                ViewBag.Message = "Twój koszyk jest pusty";
+                return View();
+            }
+
+            //Obliczenie wartości koszyka (podsumowanie calej ceny)
+            decimal total = 0m;
+
+            foreach (var item in cart)
+            {
+                total += item.Total;
+            }
+            ViewBag.GrandTotal = total;
+
+            return View(cart);
         }
         public ActionResult CartPartial()
         {
