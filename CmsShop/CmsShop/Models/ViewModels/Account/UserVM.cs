@@ -18,7 +18,7 @@ namespace CmsShop.Models.ViewModels.Account
             Id = row.Id;
             FirstName = row.FirstName;
             LastName = row.LastName;
-            EmailAdress = row.EmailAdress;
+            EmailAddress = row.EmailAddress;
             UserName = row.UserName;
             Password = row.Password;
         }
@@ -29,7 +29,7 @@ namespace CmsShop.Models.ViewModels.Account
         public string LastName { get; set; }
         [Required]
         [DataType(DataType.EmailAddress)]
-        public string EmailAdress { get; set; }
+        public string EmailAddress { get; set; }
         [Required]
         public string UserName { get; set; }
         [Required]
