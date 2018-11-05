@@ -18,6 +18,7 @@ namespace CmsShop
             //    url: "{controller}/{action}/{id}",
             //    defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             //);
+            routes.MapRoute("Account", "Account/{action}/{id}", new { controller = "Account", action = "Index", id = UrlParameter.Optional }, new[] { "CmsShop.Controllers" });
             routes.MapRoute("Cart", "Cart/{action}/{id}", new { controller = "Cart", action = "Index", id = UrlParameter.Optional }, new[] { "CmsShop.Controllers" });
             routes.MapRoute("Shop", "Shop/{action}/{name}", new { controller = "Shop", action = "Index", name = UrlParameter.Optional }, new[] { "CmsShop.Controllers" });
             routes.MapRoute("SidebarPartial", "Page/SidebarPartial", new { controller = "Pages", action = "SidebarPartial" }, new[] { "CmsShop.Controllers" });
