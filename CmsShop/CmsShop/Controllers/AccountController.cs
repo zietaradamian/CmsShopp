@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Security;
 
 namespace CmsShop.Controllers
 {
@@ -16,6 +17,7 @@ namespace CmsShop.Controllers
             return Redirect("~/account/login");
         }
         // GET: /account/login
+        [HttpGet]
         public ActionResult Login()
         {
             //sprawdzanie czy użytkownik jest zalogowany
@@ -26,6 +28,36 @@ namespace CmsShop.Controllers
             }
             //zwracamy widok logowania
             return View();
+
+        }
+        // POST: /account/login
+        [HttpPost]
+        public ActionResult Login(LoginUserVM model)
+        {
+            //sprawdzenie modelstate
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            //sprawdzamy użytkownika
+            bool isValid = false;
+            using (Db db = new Db())
+            {
+                if (db.Users.Any(x=>x.UserName.Equals(model.UserName) && x.Password.Equals(model.Password)))
+                {
+                    isValid = true;
+                }
+            }
+            if (!isValid)
+            {
+                ModelState.AddModelError("", "Nieporawidłowa nazwa użytkownia lub hasło!");
+                return View(model);
+            }
+            else
+            {
+                FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
+                return Redirect(FormsAuthentication.GetRedirectUrl(model.UserName, model.RememberMe));
+            }
 
         }
         // GET: /account/create-account
@@ -95,6 +127,13 @@ namespace CmsShop.Controllers
             TempData["SM"] = "Jesteś teraz zarejestrowany i możesz się zalogować!";
 
 
+            return Redirect("~/account/login");
+        }
+        // Get: /account/LogOut
+      
+        public ActionResult LogOut()
+        {
+            FormsAuthentication.SignOut();
             return Redirect("~/account/login");
         }
     }
