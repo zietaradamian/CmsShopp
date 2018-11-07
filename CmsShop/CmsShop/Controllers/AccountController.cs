@@ -135,7 +135,7 @@ namespace CmsShop.Controllers
             FormsAuthentication.SignOut();
             return Redirect("~/account/login");
         }
-        // Get: /account/usernavpartial
+        // 
         public ActionResult UserNavPartial()
         {
             //pobieramy username
@@ -158,5 +158,26 @@ namespace CmsShop.Controllers
             }
             return PartialView(model);
         }
+        // Get: /account/user-profile
+        [ActionName("user-profile")]
+        [HttpGet]
+        public ActionResult UserProfile()
+        {
+            //pobieramy nazwę użytkownika
+            string userName = User.Identity.Name;
+
+            //deklarujemy model
+            UserProfileVM model;
+
+            using (Db db = new Db())
+            {
+                //pobieramy użytkownika
+                UserDTO dto = db.Users.FirstOrDefault(x => x.UserName == userName);
+
+                model = new UserProfileVM(dto);
+            }
+            return View("UserProfile",model);
+        }
+
     }
 }
