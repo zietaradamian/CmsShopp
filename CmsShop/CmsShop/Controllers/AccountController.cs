@@ -130,11 +130,33 @@ namespace CmsShop.Controllers
             return Redirect("~/account/login");
         }
         // Get: /account/LogOut
-      
         public ActionResult LogOut()
         {
             FormsAuthentication.SignOut();
             return Redirect("~/account/login");
+        }
+        // Get: /account/usernavpartial
+        public ActionResult UserNavPartial()
+        {
+            //pobieramy username
+            string userName = User.Identity.Name;
+
+            //deklarujemy model
+            UserNavPartialVM model;
+
+            using (Db db = new Db())
+            {
+                //pobieramy użytkownika
+                UserDTO dto = db.Users.FirstOrDefault(x => x.UserName == userName);
+
+                model = new UserNavPartialVM()
+                {
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName
+                };
+
+            }
+            return PartialView(model);
         }
     }
 }
