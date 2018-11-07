@@ -178,6 +178,54 @@ namespace CmsShop.Controllers
             }
             return View("UserProfile",model);
         }
+        // POST: /account/user-profile
+        [ActionName("user-profile")]
+        [HttpPost]
+        public ActionResult UserProfile(UserProfileVM model)
+        {
+            //sprawdzanie modelstate
+            if (!ModelState.IsValid)
+            {
+                return View("UserProfile", model);
+            }
+            //sprawdznie czy hasła są takie same
+            if (!string.IsNullOrWhiteSpace(model.Password))
+            {
+                if (!model.Password.Equals(model.ConfirmPassword))
+                {
+                    ModelState.AddModelError("", "Hasła nie są takie same!");
+                    return View("UserProfile", model);
+                }
+            }
 
+            using (Db db = new Db())
+            {
+                //pobieramy nazwę użytkownika 
+                string userName = User.Identity.Name;
+
+                //sprawdznie czy ta nazwa użytkownika jest unikalna
+                if (db.Users.Where(x=>x.Id != model.Id).Any(x=>x.UserName == userName))
+                {
+                    ModelState.AddModelError("", "Ta nazwa użytkownika" + model.UserName +" jest zajęta!");
+                    userName = "";
+                    return View("UserProfile", model);
+                }
+                //edycja dto
+                UserDTO dto = db.Users.Find(model.Id);
+                dto.FirstName = model.FirstName;
+                dto.LastName = model.LastName;
+                dto.EmailAddress = model.EmailAddress;
+                dto.UserName = model.UserName;
+                if (!string.IsNullOrWhiteSpace(model.Password))
+                {
+                    dto.Password = model.Password;
+                }
+                db.SaveChanges();
+            }
+
+            //ustawienie komunikatu TD
+            TempData["SM"] = "Edytowałeś swój profil";
+            return Redirect("~/account/user-profile");
+        }
     }
 }
