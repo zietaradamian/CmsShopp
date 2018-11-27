@@ -1,5 +1,6 @@
 ﻿using CmsShop.Models.Data;
 using CmsShop.Models.ViewModels.Account;
+using CmsShop.Models.ViewModels.Shop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -130,12 +131,14 @@ namespace CmsShop.Controllers
             return Redirect("~/account/login");
         }
         // Get: /account/LogOut
+        [Authorize]
         public ActionResult LogOut()
         {
             FormsAuthentication.SignOut();
             return Redirect("~/account/login");
         }
         // 
+        [Authorize]
         public ActionResult UserNavPartial()
         {
             //pobieramy username
@@ -161,6 +164,7 @@ namespace CmsShop.Controllers
         // Get: /account/user-profile
         [ActionName("user-profile")]
         [HttpGet]
+        [Authorize]
         public ActionResult UserProfile()
         {
             //pobieramy nazwę użytkownika
@@ -181,6 +185,7 @@ namespace CmsShop.Controllers
         // POST: /account/user-profile
         [ActionName("user-profile")]
         [HttpPost]
+        [Authorize]
         public ActionResult UserProfile(UserProfileVM model)
         {
             //sprawdzanie modelstate
@@ -226,6 +231,58 @@ namespace CmsShop.Controllers
             //ustawienie komunikatu TD
             TempData["SM"] = "Edytowałeś swój profil";
             return Redirect("~/account/user-profile");
+        }
+        // Get: /account/Orders
+        [HttpGet]
+        [Authorize(Roles = "User")]
+        public ActionResult Orders()
+        {
+            //inicjalizacja Listy zamówień dla użytkownika
+            List<OrderForUserVM> ordersForUser = new List<OrderForUserVM>();
+
+            using (Db db = new Db())
+            {
+                //pobieramy Id użytkownika
+                UserDTO user = db.Users.Where(x => x.UserName == User.Identity.Name).FirstOrDefault();
+                int userId = user.Id;
+
+                //pobieramy zamówienia dla użytkownika
+                List<OrderVM> orders = db.Orders.Where(x => x.UserId == userId).ToArray().Select(x => new OrderVM(x)).ToList();
+
+                foreach (var order in orders)
+                {
+                    //inicjalizacja slownika produktów
+                    Dictionary<string, int> productsAndQty = new Dictionary<string, int>();
+                    decimal total = 0m;
+
+                    //pobieramy szczegoly zamowienia
+                    List<OrderDetailsDTO> orderDetailsDTO = db.OrderDetails.Where(x => x.OrderId == order.OrderId).ToList();
+
+                    foreach (var orderDetails in orderDetailsDTO)
+                    {
+                        //pobieramy produkt
+                        ProductDTO product = db.Products.Where(x => x.Id == orderDetails.ProductId).FirstOrDefault();
+                        //pobieramy cene
+                        decimal price = product.Prize;
+                        //pobieramy nazwe
+                        string productName = product.Name;
+
+                        //dodajemy produkt do slownika
+                        if(!productsAndQty.ContainsKey(productName))
+                        productsAndQty.Add(productName, orderDetails.Quantity);
+
+                        total += orderDetails.Quantity * price;
+                    }
+                    ordersForUser.Add(new OrderForUserVM()
+                    {
+                        OrderNumber = order.OrderId,
+                        Total = total,
+                        ProductsAndQty = productsAndQty,
+                        CreatedAt = order.CreatedAt
+                    });
+                }
+            }
+            return View(ordersForUser);
         }
     }
 }
